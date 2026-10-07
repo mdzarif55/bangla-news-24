@@ -27,16 +27,16 @@ export default async function Home() {
   console.log(otherSection)
   return (
     <div className="">
-      <Marquee />
+      
 
-      <div className="grid grid-cols-3 gap-2 mt-5 max-w-7xl mx-auto">
+      <div className="grid grid-cols-3 gap-2 mt-5">
         {/* news section  */}
-        <div className=" col-span-2">
+        <div className=" col-span-2 ">
           <MainNews news={mainNews} />
 
-          <div className="grid gap-5 mt-5">
+          <div className="grid gap-5 mt-5 ">
             {otherSection.map(os => <div key={os.curationId} className=""><h1 className="font-bold border-b-2 pb-1 border-red-700 ">{os.title}</h1>
-            <div className="grid grid-cols-3 gap-2 mt-5">{os.articles.map(news=><NewsCard key={news.id} news={news}/>)}</div> </div>)}
+            <div className="grid grid-cols-3 gap-2 mt-5 ">{os.articles.map(news=><NewsCard key={news.id} news={news}/>)}</div> </div>)}
           </div>
         </div>
 

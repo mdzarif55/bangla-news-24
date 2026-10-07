@@ -1,0 +1,22 @@
+import NewsCard from '@/app/components/NewsCard'
+import React from 'react'
+
+const categoryPage = async ({ params }) => {
+    const { categoryId } = await params
+
+    const res = await fetch(`https://news-api-v2.vercel.app/api/category/${categoryId}`)
+    const data = await res.json()
+    const categoryNews = data.data
+    console.log(data)
+    return (
+        <div >
+            <h1 className='text-2xl font-bold border-b-2 border-red-700 mb-5 '>{data.title}</h1>
+
+            <div className='grid grid-cols-3 gap-10'>
+                {categoryNews.map(news=><NewsCard news={news} key={news.id}/>)}
+            </div>
+        </div>
+    )
+}
+
+export default categoryPage
