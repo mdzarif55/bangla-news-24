@@ -55,7 +55,7 @@ const NavLinks = async () => {
             href="/"
             className="
               group relative rounded-lg px-4 py-2
-              text-sm font-semibold
+              text-md font-semibold
               text-base-content/80
               transition-all duration-300
               hover:bg-primary
@@ -82,7 +82,7 @@ const NavLinks = async () => {
               href={`/${n.slug}`}
               className="
                 group relative rounded-lg px-4 py-2
-                text-sm font-medium
+                text-md font-medium
                 text-base-content/70
                 transition-all duration-300
                 hover:bg-primary/10

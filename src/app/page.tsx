@@ -1,9 +1,48 @@
 import Image from "next/image";
+import Marquee from "./components/Marquee";
+import MainNews from "./components/MainNews";
+import NewsCard from "./components/NewsCard";
+import MostRead from "./components/MostRead";
+interface otherSection{
+  curationId: string;
+  title:string;
+  articles:{
+    id:string
+    title:string
+    description:string
+    category:string
+    imageUrl:string
+    imageAlt:string
+  }[];
+}
 
-export default function Home() {
+export default async function Home() {
+
+  const res = await fetch("https://news-api-v2.vercel.app/api/news/sections")
+  const data = await res.json()
+  const sections = data.data;
+  const mainNews = sections[0].articles
+  const otherSection : otherSection[] = sections.slice(1)
+
+  console.log(otherSection)
   return (
-   <div className="">
-    সারা দেশে গত ২৪ ঘণ্টায় ডেঙ্গু আক্রান্ত হয়ে আরও নয়জনের মৃত্যু হয়েছে। একই সময়ে ডেঙ্গু আক্রান্ত হয়ে ১ হাজার ৯০২ জন হাসপাতালে ভর্তি হয়েছেন। সোমবার (৫ অক্টোবর) স্বাস্থ্য অধিদপ্তরের হেলথ ইমার্জেন্সি অপারেশন সেন্টার ও কন্ট্রোল রুম থেকে পাঠানো ডেঙ্গুবিষয়ক এক প্রেস
-   </div>
+    <div className="">
+      <Marquee />
+
+      <div className="grid grid-cols-3 gap-2 mt-5 max-w-7xl mx-auto">
+        {/* news section  */}
+        <div className=" col-span-2">
+          <MainNews news={mainNews} />
+
+          <div className="grid gap-5 mt-5">
+            {otherSection.map(os => <div key={os.curationId} className=""><h1 className="font-bold border-b-2 pb-1 border-red-700 ">{os.title}</h1>
+            <div className="grid grid-cols-3 gap-2 mt-5">{os.articles.map(news=><NewsCard key={news.id} news={news}/>)}</div> </div>)}
+          </div>
+        </div>
+
+        {/* most read section  */}
+        <div className="col-span-1"><MostRead/></div>
+      </div>
+    </div>
   );
 }
