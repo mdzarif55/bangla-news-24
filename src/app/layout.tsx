@@ -23,12 +23,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       data-theme="light"
       className={`${notoSerifBenglai.className} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <Header/>
-        <Marquee />
-        <main className=" max-w-7xl  mx-auto mt-5">{children}</main>
-        <Footer/>
-      </body>
+<body className="flex min-h-screen flex-col">
+  <Header />
+
+  <Marquee />
+
+  <main className="mx-auto mt-5 w-full max-w-7xl flex-1 px-4 sm:px-6 lg:px-8">
+    {children}
+  </main>
+
+  <Footer />
+</body>
     </html>
   );
 }

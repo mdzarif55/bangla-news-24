@@ -1,28 +1,96 @@
-import Link from 'next/link'
-import React from 'react'
-interface Navs{
-    slug:string
-    title:string
-    topicId:string | null
-    url:string 
-    scrapable: string
+import Link from "next/link";
+import React from "react";
+
+interface Navs {
+  slug: string;
+  title: string;
+  topicId: string | null;
+  url: string;
+  scrapable: string;
 }
-const NavLinks = async() => {
-    const res = await fetch("https://news-api-v2.vercel.app/api/categories")
-    const data = await res.json()
-    const navs:Navs[] = data.data
-    const filteredNavs = navs.filter(n=>n.scrapable)
-    console.log(navs)
+
+const NavLinks = async () => {
+  const res = await fetch(
+    "https://news-api-v2.vercel.app/api/categories"
+  );
+
+  const data = await res.json();
+
+  const navs: Navs[] = data.data;
+  const filteredNavs = navs.filter((n) => n.scrapable);
+
   return (
-    <div className='flex gap-5 justify-center mt-5'>
-        <Link href={"/"} >হোম</Link>
-      {filteredNavs.map((n,i)=><Link key={i} href={`/category/${n.slug}`}>{n.title}</Link>)}
+    <div className="mt-4 w-full overflow-x-auto px-3 sm:mt-5">
+      <div className="mx-auto flex w-max items-center justify-center gap-5 text-sm sm:gap-7 sm:text-base">
+        {/* Home */}
+        <Link
+          href="/"
+          className="shrink-0 font-semibold text-gray-700 transition-all duration-300 ease-out hover:scale-110 hover:text-red-700"
+        >
+          হোম
+        </Link>
+
+        {/* Categories */}
+        {filteredNavs.map((n) => (
+          <Link
+            key={n.slug}
+            href={`/category/${n.slug}`}
+            className="shrink-0 font-semibold text-gray-700 transition-all duration-300 ease-out hover:scale-110 hover:text-red-700"
+          >
+            {n.title}
+          </Link>
+        ))}
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default NavLinks
+export default NavLinks;
 
+// import Link from "next/link";
+// import React from "react";
+
+// interface Navs {
+//   slug: string;
+//   title: string;
+//   topicId: string | null;
+//   url: string;
+//   scrapable: string;
+// }
+
+// const NavLinks = async () => {
+//   const res = await fetch(
+//     "https://news-api-v2.vercel.app/api/categories"
+//   );
+
+//   const data = await res.json();
+
+//   const navs: Navs[] = data.data;
+//   const filteredNavs = navs.filter((n) => n.scrapable);
+
+//   return (
+//     <div className="mt-5 flex justify-center gap-7 text-md">
+//       <Link
+//         href="/"
+//         className="font-semibold text-gray-700 transition-all duration-300 ease-out hover:scale-110 hover:text-red-700"
+//       >
+//         হোম
+//       </Link>
+
+//       {filteredNavs.map((n, i) => (
+//         <Link
+//           key={i}
+//           href={`/category/${n.slug}`}
+//           className="font-semibold text-gray-700 transition-all duration-300 ease-out hover:scale-110 hover:text-red-700"
+//         >
+//           {n.title}
+//         </Link>
+//       ))}
+//     </div>
+//   );
+// };
+
+// export default NavLinks;
 
 // import Link from "next/link";
 // import React from "react";
