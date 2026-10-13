@@ -115,7 +115,7 @@ npm start
 
 ## ☁️ Deployment
 
-This project can be deployed on [Vercel](https://vercel.com/).
+This project can be deployed on [Vercel](https://bangla-news-24.vercel.app).
 
 1. Push your project to GitHub.
 2. Import the repository into Vercel.
@@ -128,7 +128,6 @@ This project can be deployed on [Vercel](https://vercel.com/).
 **Your Name**
 
 - GitHub: [Your GitHub Profile](https://github.com/mdzarif55)
-- Portfolio: [Your Portfolio URL](#)
 
 ## 📄 License
 

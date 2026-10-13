@@ -1,6 +1,6 @@
-
 import Image from "next/image";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 interface Byline {
   name: string;
@@ -57,50 +57,29 @@ const NewsPage = async ({
   const { newsId } = await params;
 
   const res = await fetch(
-    `https://news-api-v2.vercel.app/api/article/${newsId}`,
+    `https://news-api-v2.vercel.app/api/article/${encodeURIComponent(newsId)}`,
     {
-      next: {
-        revalidate: 60,
-      },
+      next: { revalidate: 60 },
     }
   );
 
+  // Invalid ID or missing article
   if (!res.ok) {
-    throw new Error("Failed to fetch news");
+    notFound();
   }
 
   const data = await res.json();
-  const news: News = data.data;
+  const news: News | null = data.data;
 
-  if (!news) {
-    return (
-      <div className="mx-auto flex min-h-[60vh] max-w-7xl items-center justify-center px-4">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold">
-            সংবাদ পাওয়া যায়নি
-          </h1>
-
-          <p className="mt-2 text-gray-500">
-            আপনি যে সংবাদটি খুঁজছেন সেটি পাওয়া যায়নি।
-          </p>
-
-          <Link
-            href="/"
-            className="mt-5 inline-block rounded-md bg-red-700 px-5 py-2 text-white transition hover:bg-red-800"
-          >
-            হোমে ফিরে যান
-          </Link>
-        </div>
-      </div>
-    );
+  if (!news || !news.id || !news.title) {
+    notFound();
   }
 
   const publishedDate = new Date(news.firstPublished);
 
   return (
-    <main className="bg-base-100">
+    <main className="w-full bg-base-100">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:py-10">
-
         {/* Back */}
         <div className="mb-6">
           <Link
@@ -111,212 +90,167 @@ const NewsPage = async ({
           </Link>
         </div>
 
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
-  <article className="mx-auto max-w-4xl">
+        <article>
+          {/* Topics */}
+          {news.topics?.length > 0 && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {news.topics.map((topic) => (
+                <span
+                  key={topic.id}
+                  className="rounded-full bg-red-100 px-3 py-1 text-sm font-semibold text-red-700"
+                >
+                  {topic.name}
+                </span>
+              ))}
+            </div>
+          )}
 
-            {/* Category / Topic */}
-            {news.topics.length > 0 && (
-              <div className="mb-4 flex flex-wrap gap-2">
-                {news.topics.map((topic) => (
-                  <span
-                    key={topic.id}
-                    className="rounded-full bg-red-100 px-3 py-1 text-sm font-semibold text-red-700"
+          {/* Title */}
+          <h1 className="text-2xl font-bold leading-tight text-gray-900 sm:text-3xl lg:text-4xl">
+            {news.title}
+          </h1>
+
+          {/* Author + Date */}
+          <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-gray-200 pb-5 text-sm text-gray-500">
+            {news.byline?.length > 0 && (
+              <div>
+                <span>লেখক: </span>
+                <span className="font-semibold text-gray-700">
+                  {news.byline.map((person) => person.name).join(", ")}
+                </span>
+              </div>
+            )}
+
+            {news.firstPublished && !Number.isNaN(publishedDate.getTime()) && (
+              <>
+                <span>
+                  প্রকাশিত:{" "}
+                  {publishedDate.toLocaleDateString("bn-BD", {
+                    dateStyle: "long",
+                  })}
+                </span>
+
+                <span>
+                  {publishedDate.toLocaleTimeString("bn-BD", {
+                    hour: "numeric",
+                    minute: "numeric",
+                  })}
+                </span>
+              </>
+            )}
+          </div>
+
+          {/* Article Body */}
+          <div className="mt-8">
+            {news.body?.map((item, index) => {
+              if (item.type === "text") {
+                return (
+                  <p
+                    key={index}
+                    className="mb-6 text-base leading-8 text-gray-800 sm:text-lg sm:leading-9"
                   >
-                    {topic.name}
+                    {item.text}
+                  </p>
+                );
+              }
+
+              if (item.type === "image") {
+                return (
+                  <figure key={index} className="my-8">
+                    <div className="overflow-hidden rounded-xl">
+                      <Image
+                        src={item.url}
+                        alt={item.altText || item.caption || news.title}
+                        width={item.width || 1200}
+                        height={item.height || 675}
+                        className="h-auto w-full object-cover"
+                        sizes="(max-width: 768px) 100vw, 768px"
+                      />
+                    </div>
+
+                    {item.caption && (
+                      <figcaption className="mt-2 text-sm leading-6 text-gray-500">
+                        {item.caption}
+                      </figcaption>
+                    )}
+
+                    {item.copyrightHolder && (
+                      <p className="mt-1 text-xs text-gray-400">
+                        ছবি: {item.copyrightHolder}
+                      </p>
+                    )}
+                  </figure>
+                );
+              }
+
+              return null;
+            })}
+          </div>
+
+          {/* Tags */}
+          {news.tags?.length > 0 && (
+            <div className="mt-8 border-t border-gray-200 pt-6">
+              <h3 className="mb-3 font-bold text-gray-800">ট্যাগ</h3>
+
+              <div className="flex flex-wrap gap-2">
+                {news.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-md bg-gray-100 px-3 py-1 text-sm text-gray-600"
+                  >
+                    #{tag}
                   </span>
                 ))}
               </div>
-            )}
-
-            {/* Title */}
-            <h1 className="text-3xl font-bold leading-tight text-gray-900 sm:text-4xl lg:text-5xl">
-              {news.title}
-            </h1>
-
-            {/* Author + Date */}
-            <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-gray-200 pb-5 text-sm text-gray-500">
-
-              {news.byline.length > 0 && (
-                <div>
-                  <span>লেখক: </span>
-
-                  <span className="font-semibold text-gray-700">
-                    {news.byline.map((person) => person.name).join(", ")}
-                  </span>
-                </div>
-              )}
-
-              <span>
-                প্রকাশিত:{" "}
-                {publishedDate.toLocaleDateString("bn-BD", {
-                  dateStyle: "long",
-                })}
-              </span>
-
-              <span>
-                {publishedDate.toLocaleTimeString("bn-BD", {
-                  hour: "numeric",
-                  minute: "numeric",
-                })}
-              </span>
             </div>
+          )}
 
-            {/* Main Image */}
-            {/* <div className="mt-6 overflow-hidden rounded-xl">
-              <Image
-                src={news.imageUrl}
-                alt={news.title}
-                width={1200}
-                height={675}
-                priority
-                className="h-auto w-full object-cover"
-              />
-            </div> */}
+          {/* Share */}
+          <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-gray-200 pt-6">
+            <span className="font-semibold text-gray-700">
+              শেয়ার করুন:
+            </span>
 
-            {/* Article Body */}
-            <div className="mt-8">
+            <a
+              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(news.link || news.sourceUrl)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Share on Facebook"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-red-600 font-bold text-white transition hover:bg-red-700"
+            >
+              f
+            </a>
 
-              {news.body.map((item, index) => {
+            <a
+              href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(news.link || news.sourceUrl)}&text=${encodeURIComponent(news.title)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Share on X"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-black font-bold text-white transition hover:bg-gray-800"
+            >
+              𝕏
+            </a>
 
-                {/* Text */}
-                if (item.type === "text") {
-                  return (
-                    <p
-                      key={index}
-                      className="mb-6 text-lg leading-9 text-gray-800 sm:text-xl"
-                    >
-                      {item.text}
-                    </p>
-                  );
-                }
+            <a
+              href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`${news.title} ${news.link || news.sourceUrl}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Share on WhatsApp"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-green-600 font-bold text-white transition hover:bg-green-700"
+            >
+              W
+            </a>
+          </div>
 
-                {/* Image */}
-                if (item.type === "image") {
-                  return (
-                    <figure
-                      key={index}
-                      className="my-8"
-                    >
-                      <div className="overflow-hidden rounded-xl">
-                        <Image
-                          src={item.url}
-                          alt={item.altText || item.caption}
-                          width={item.width}
-                          height={item.height}
-                          className="h-auto w-full object-cover"
-                        />
-                      </div>
-
-                      {item.caption && (
-                        <figcaption className="mt-2 text-sm leading-6 text-gray-500">
-                          {item.caption}
-                        </figcaption>
-                      )}
-
-                      {item.copyrightHolder && (
-                        <p className="mt-1 text-xs text-gray-400">
-                          ছবি: {item.copyrightHolder}
-                        </p>
-                      )}
-                    </figure>
-                  );
-                }
-
-                return null;
-              })}
-            </div>
-
-            {/* Tags */}
-            {news.tags.length > 0 && (
-              <div className="mt-8 border-t border-gray-200 pt-6">
-                <h3 className="mb-3 font-bold">
-                  ট্যাগ
-                </h3>
-
-                <div className="flex flex-wrap gap-2">
-                  {news.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-md bg-gray-100 px-3 py-1 text-sm text-gray-600"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Share */}
-            <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-gray-200 pt-6">
-
-              <span className="font-semibold text-gray-700">
-                শেয়ার করুন:
-              </span>
-
-              <button
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-red-600 font-bold text-white transition hover:bg-red-700"
-                aria-label="Facebook"
-              >
-                f
-              </button>
-
-              <button
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-black font-bold text-white transition hover:bg-gray-800"
-                aria-label="X"
-              >
-                𝕏
-              </button>
-
-              <button
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-green-600 font-bold text-white transition hover:bg-green-700"
-                aria-label="WhatsApp"
-              >
-                W
-              </button>
-            </div>
-
-            {/* Source */}
+          {/* Source */}
+          {news.source && (
             <div className="mt-6 rounded-lg bg-gray-50 p-4 text-sm text-gray-600">
               <p>
-                সূত্র:{" "}
-                <span className="font-semibold">
-                  {news.source}
-                </span>
+                সূত্র: <span className="font-semibold">{news.source}</span>
               </p>
             </div>
-          </article>
-
-          {/* ================= SIDEBAR ================= */}
-
-          {/* <aside className="lg:col-span-1">
-            <div className="sticky top-5 rounded-xl border border-gray-200 bg-base-100 p-5 shadow-sm">
-
-              <h2 className="border-b-2 border-red-700 pb-3 text-xl font-bold">
-                সর্বাধিক পঠিত
-              </h2>
-
-              <div className="mt-5 space-y-5">
-
-                {[1, 2, 3, 4].map((number) => (
-                  <Link
-                    href="#"
-                    key={number}
-                    className="group flex gap-3"
-                  >
-                    <span className="text-2xl font-bold text-red-600">
-                      {number}
-                    </span>
-
-                    <p className="font-semibold leading-6 transition group-hover:text-red-600">
-                      সর্বশেষ গুরুত্বপূর্ণ সংবাদ ও আপডেট
-                    </p>
-                  </Link>
-                ))}
-
-              </div>
-            </div>
-          </aside> */}
-        </div>
+          )}
+        </article>
       </div>
     </main>
   );
