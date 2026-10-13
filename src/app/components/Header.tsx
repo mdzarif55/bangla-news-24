@@ -39,15 +39,23 @@ const Header = () => {
           </div>
 
           {/* Buttons */}
+         
           <div className="flex items-center justify-center gap-2 sm:justify-end">
-            <Link href='/signin'><button className="btn btn-sm sm:btn-md">
+            <Link
+              href="/signin"
+              className="inline-flex h-9 items-center justify-center rounded-lg border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 shadow-sm transition-all duration-200 hover:border-red-700 hover:bg-red-50 hover:text-red-700 active:scale-95 sm:h-10 sm:px-5"
+            >
               সাইন ইন
-            </button></Link>
+            </Link>
 
-            <Link href='/signup'><button className="btn btn-sm bg-red-700 text-white hover:bg-red-800 sm:btn-md">
+            <Link
+              href="/signup"
+              className="inline-flex h-9 items-center justify-center rounded-lg bg-red-700 px-4 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-red-800 hover:shadow-md active:scale-95 sm:h-10 sm:px-5"
+            >
               সাইন আপ
-            </button></Link>
+            </Link>
           </div>
+          
         </div>
 
         {/* ================= NAVIGATION ================= */}
