@@ -27,7 +27,7 @@
 //   console.log(otherSection)
 //   return (
 //     <div className="">
-      
+
 
 //       <div className="grid grid-cols-3 gap-2 mt-5">
 //         {/* news section  */}
@@ -62,6 +62,7 @@ interface OtherSection {
     category: string;
     imageUrl: string;
     imageAlt: string;
+    count : number;
   }[];
 }
 
@@ -79,7 +80,9 @@ export default async function Home() {
   const sections = data.data;
 
   const mainNews = sections[0]?.articles ?? [];
-  const otherSection: OtherSection[] = sections.slice(1);
+  const otherSection: OtherSection[] = sections
+    .slice(1)
+    .filter((section: OtherSection & { count: number }) => section.count > 1);
 
   return (
     <div className="w-full">
